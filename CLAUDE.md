@@ -42,9 +42,14 @@ assinar um desses serviços, perguntar antes de automatizar upload (são ações
 terceiros, fora do escopo de scripts locais).
 
 ## Ambiente
-- `ffmpeg`/`ffprobe` e `faster-whisper` (Python) já instalados e funcionando nesta conta.
-- Hosts liberados no ambiente "Default" para isso: `huggingface.co`, `cdn-lfs.huggingface.co`,
-  `cdn-lfs-us-1.hf.co`, `cas-server.xethub.hf.co` (necessários para baixar o modelo Whisper).
+- Este repositório tem um **ambiente cloud próprio** ("beatandmoney-videos"), com script de setup
+  que já instala `faster-whisper` e `av<14` (ver `requirements.txt`) em toda sessão nova — escolha
+  esse ambiente ao abrir uma sessão neste projeto.
+- Hosts liberados nesse ambiente (necessários pro download do modelo Whisper): `huggingface.co`,
+  `cdn-lfs.huggingface.co`, `cdn-lfs-us-1.hf.co`, `cas-server.xethub.hf.co`, `us.aws.cdn.hf.co`.
+- Se `scripts/00_check_env.sh` acusar falta de `faster-whisper`, rode:
+  `pip3 install -r requirements.txt` (o pin `av<14` é necessário — versões mais novas do pacote
+  `av` quebram a API usada pelo faster-whisper).
 - Arquivos de mídia (raw/output) NÃO vão para o git (`.gitignore`) — ficam só no container da
   sessão. Sempre entregar os arquivos finais ao usuário via `SendUserFile` antes de encerrar,
   porque o container é temporário.
