@@ -1,0 +1,20 @@
+# Mídia bruta e gerada nunca vai pro git (arquivos grandes)
+projects/**/raw/*
+!projects/**/raw/.gitkeep
+projects/**/output/**/*
+!projects/**/output/**/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+*.srt
+!projects/_TEMPLATE/**
+
+# Python / modelos
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
