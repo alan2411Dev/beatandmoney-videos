@@ -51,13 +51,18 @@ Beat & Money, até o próximo.
 3. "IA é o metrônomo. Quem compõe a música com você é o assessor."
 4. "Eu uso IA toda semana. Mas decisão de carteira exige alguém que responde por você."
 
-## Trechos candidatos a corte (preencher depois de gravar/transcrever)
-| Início | Fim | Por quê funciona | Destino |
+## Trechos cortados (vídeo final limpo, _intermediate/take_01_final.mp4)
+| Início | Fim | Conteúdo | Destino |
 |---|---|---|---|
-|  |  | Hook + gancho 1 (abertura) | Shorts/Reels/TikTok |
-|  |  | Gancho 2 (IA não tem CPF) | Shorts/Reels/TikTok |
-|  |  | Gancho 3 (metrônomo vs compositor) | Stories |
-|  |  | Fechamento (gancho 4) | Feed |
+| 0:00 | 0:19 | Hook + gancho 1 (abertura) | Shorts/Reels/TikTok |
+| 0:00 | 0:13 | Mesmo hook, versão curta + CTA | Stories |
+| 4:27 | 4:33 | Gancho 2 "IA não tem CPF" (retake limpo no final da gravação) | Shorts/Reels/TikTok |
+| 2:28 | 3:04 | Gancho 3 metrônomo/Ferrari vs assessor | Shorts/Reels/TikTok |
+| 3:54 | 4:27 | Fechamento + gancho 4 + marca | Feed |
+
+Nota de produção: a gravação bruta tinha ~9min, mas quase metade era
+pausa de pensamento/leitura do roteiro — removido automaticamente
+(script `06_remove_silence.py`). Vídeo final do YouTube: 4min33s.
 
 ## Publicação
 - YouTube:
