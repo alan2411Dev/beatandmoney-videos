@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Gera recorte para o feed do Instagram (quadrado 1:1 ou retrato 4:5) a partir de um trecho do vídeo.
 #
-# Uso: scripts/04_make_feed_post.sh <entrada.mp4> <inicio> <fim> <saida.mp4> <formato:square|4x5>
+# Uso: scripts/04_make_feed_post.sh <entrada.mp4> <inicio> <fim> <saida.mp4> <formato:square|4x5> [legenda.srt]
 set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$DIR/lib/common.sh"
 
-IN="$1"; START="$2"; END="$3"; OUT="$4"; FORMATO="${5:-square}"
+IN="$1"; START="$2"; END="$3"; OUT="$4"; FORMATO="${5:-square}"; SRT="$6"
 [ -z "$IN" ] || [ -z "$START" ] || [ -z "$END" ] || [ -z "$OUT" ] && {
-  echo "Uso: $0 <entrada.mp4> <inicio> <fim> <saida.mp4> <formato:square|4x5>"; exit 1; }
+  echo "Uso: $0 <entrada.mp4> <inicio> <fim> <saida.mp4> <formato:square|4x5> [legenda.srt]"; exit 1; }
 require_file "$IN"
 mkdir -p "$(dirname "$OUT")"
 
@@ -19,6 +19,9 @@ if [ "$FORMATO" = "4x5" ]; then
 else
   read CW CH <<< "$(compute_crop "$W" "$H" 1 1)"
   VF="crop=${CW}:${CH},scale=1080:1080"
+fi
+if [ -n "$SRT" ] && [ -f "$SRT" ]; then
+  VF="${VF},subtitles=${SRT}:force_style='${SUB_STYLE}'"
 fi
 
 ffmpeg -y -ss "$START" -to "$END" -i "$IN" \
