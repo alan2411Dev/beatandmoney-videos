@@ -13,7 +13,9 @@ IN="$1"; START="$2"; END="$3"; OUT="$4"; SRT="$5"; CTA="${6:-nao}"
 require_file "$IN"
 mkdir -p "$(dirname "$OUT")"
 
-VF="crop=ih*9/16:ih,scale=1080:1920"
+read W H <<< "$(get_display_dims "$IN")"
+read CW CH <<< "$(compute_crop "$W" "$H" 9 16)"
+VF="crop=${CW}:${CH},scale=1080:1920"
 if [ -n "$SRT" ] && [ -f "$SRT" ]; then
   VF="${VF},subtitles=${SRT}:force_style='${SUB_STYLE}'"
 fi

@@ -12,10 +12,13 @@ IN="$1"; START="$2"; END="$3"; OUT="$4"; FORMATO="${5:-square}"
 require_file "$IN"
 mkdir -p "$(dirname "$OUT")"
 
+read W H <<< "$(get_display_dims "$IN")"
 if [ "$FORMATO" = "4x5" ]; then
-  VF="crop=ih*4/5:ih,scale=1080:1350"
+  read CW CH <<< "$(compute_crop "$W" "$H" 4 5)"
+  VF="crop=${CW}:${CH},scale=1080:1350"
 else
-  VF="crop=ih:ih,scale=1080:1080"
+  read CW CH <<< "$(compute_crop "$W" "$H" 1 1)"
+  VF="crop=${CW}:${CH},scale=1080:1080"
 fi
 
 ffmpeg -y -ss "$START" -to "$END" -i "$IN" \
