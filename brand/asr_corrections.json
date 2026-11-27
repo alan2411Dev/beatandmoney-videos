@@ -1,0 +1,31 @@
+{
+  "_comment": "Erros recorrentes do Whisper com termos da marca. 'wrong' e 'right' devem ter o mesmo número de palavras (facilita realinhar timestamp por palavra). Usado por scripts/02d_fix_transcript.py.",
+  "word_swaps": [
+    {"wrong": ["a", "lambe", "timane"], "right": ["beat", "&", "money"]},
+    {"wrong": ["a", "lambe", "timanei"], "right": ["beat", "&", "money"]},
+    {"wrong": ["a", "lambit", "manley"], "right": ["beat", "&", "money"]},
+    {"wrong": ["bitmoney"], "right": ["beat & money"]},
+    {"wrong": ["cps"], "right": ["cpf"]},
+    {"wrong": ["cps."], "right": ["cpf."]},
+    {"wrong": ["cps,"], "right": ["cpf,"]},
+    {"wrong": ["escritora", "da", "bars"], "right": ["assessoria", "da", "barsi"]},
+    {"wrong": ["escritora", "da", "bars,"], "right": ["assessoria", "da", "barsi,"]},
+    {"wrong": ["acessor"], "right": ["assessor"]},
+    {"wrong": ["acessor,"], "right": ["assessor,"]},
+    {"wrong": ["acessor."], "right": ["assessor."]},
+    {"wrong": ["a", "lan,"], "right": ["alan,"]},
+    {"wrong": ["a", "lan"], "right": ["alan"]}
+  ],
+  "text_phrases": [
+    ["a lambe timane", "Beat & Money"],
+    ["lambe timane", "Beat & Money"],
+    ["lambe timanei", "Beat & Money"],
+    ["lambit manley", "Beat & Money"],
+    ["bitmoney", "Beat & Money"],
+    ["bit manei", "Beat & Money"],
+    ["CPS", "CPF"],
+    ["escritora da bars", "assessoria da Barsi"],
+    ["bloca o trade", "Bloco 3"],
+    ["acessor", "assessor"]
+  ]
+}
