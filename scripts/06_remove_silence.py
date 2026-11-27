@@ -2,16 +2,20 @@
 """Remove pausas longas (silêncio) do vídeo, tipo corte de ritmo (jump cut) de editor.
 
 Mantém pausas curtas e naturais de respiração; corta só os "brancos" longos (pensando,
-lendo o roteiro, etc). Um único ffmpeg, sem perder sincronismo áudio/vídeo.
+lendo o roteiro, etc). Processa um segmento de cada vez (baixo consumo de memória) e
+depois junta tudo com concat demuxer (sem recodificar de novo).
 
 Uso:
   python3 scripts/06_remove_silence.py <entrada.mp4> <saida.mp4> \
       [--min-gap 1.8] [--noise -30dB] [--pad 0.12] [--start S] [--end E]
 """
 import argparse
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 SIL_START = re.compile(r"silence_start:\s*([\-0-9.]+)")
 SIL_END = re.compile(r"silence_end:\s*([\-0-9.]+)")
@@ -77,42 +81,39 @@ def main():
 
     print("Detectando silêncios...")
     silences = detect_silences(args.input, args.noise, args.start, args.end)
-    # silencedetect timestamps já são relativos ao trecho quando -ss/-to são usados antes de -i
     keep = build_keep_segments(silences, args.min_gap, args.pad, duration)
 
     removed = duration - sum(e - s for s, e in keep)
-    print(f"{len(silences)} silêncios detectados, {len(silences) - len(keep) + 1} cortes aplicados "
-          f"(>= {args.min_gap}s). Removendo ~{removed:.1f}s de {duration:.1f}s.")
+    print(f"{len(silences)} silêncios detectados; mantendo {len(keep)} trechos "
+          f"(cortes >= {args.min_gap}s). Removendo ~{removed:.1f}s de {duration:.1f}s.")
 
-    if len(keep) <= 1:
-        print("Nada relevante para cortar; copiando trecho original.")
-        s, e = (keep[0] if keep else (0.0, duration))
-        cmd = ["ffmpeg", "-y", "-ss", str(start + s), "-to", str(start + e), "-i", args.input,
-               "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-               "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
-               args.output, "-loglevel", "warning", "-stats"]
+    tmpdir = tempfile.mkdtemp(prefix="jumpcut_")
+    try:
+        list_path = os.path.join(tmpdir, "list.txt")
+        with open(list_path, "w") as list_f:
+            for i, (s, e) in enumerate(keep):
+                seg_path = os.path.join(tmpdir, f"seg_{i:03d}.mp4")
+                abs_s, abs_e = start + s, start + e
+                cmd = [
+                    "ffmpeg", "-y",
+                    "-ss", f"{abs_s:.3f}", "-to", f"{abs_e:.3f}", "-i", args.input,
+                    "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-b:a", "192k",
+                    seg_path, "-loglevel", "error",
+                ]
+                subprocess.run(cmd, check=True)
+                list_f.write(f"file '{seg_path}'\n")
+                print(f"  [{i + 1}/{len(keep)}] {abs_s:.2f}-{abs_e:.2f}s ok")
+
+        cmd = [
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path,
+            "-c", "copy", "-movflags", "+faststart",
+            args.output, "-loglevel", "warning", "-stats",
+        ]
         subprocess.run(cmd, check=True)
-        return
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
-    parts = []
-    labels = []
-    for i, (s, e) in enumerate(keep):
-        abs_s, abs_e = start + s, start + e
-        parts.append(f"[0:v]trim=start={abs_s:.3f}:end={abs_e:.3f},setpts=PTS-STARTPTS[v{i}];")
-        parts.append(f"[0:a]atrim=start={abs_s:.3f}:end={abs_e:.3f},asetpts=PTS-STARTPTS[a{i}];")
-        labels.append(f"[v{i}][a{i}]")
-    parts.append("".join(labels) + f"concat=n={len(keep)}:v=1:a=1[outv][outa]")
-    filter_complex = "".join(parts)
-
-    cmd = [
-        "ffmpeg", "-y", "-i", args.input,
-        "-filter_complex", filter_complex,
-        "-map", "[outv]", "-map", "[outa]",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
-        args.output, "-loglevel", "warning", "-stats",
-    ]
-    subprocess.run(cmd, check=True)
     print(f"Pronto: {args.output} (nova duração ~{duration - removed:.1f}s)")
 
 
